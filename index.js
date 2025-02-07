@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * @description
  * returns {boolean} True if `value` is an `Object` but not `null`
@@ -7,7 +5,9 @@
  * @returns {boolean}
  */
 function isObject(value) {
-  return value !== null && typeof value === 'object' && !(value instanceof Date);
+	return (
+		value !== null && typeof value === 'object' && !(value instanceof Date)
+	);
 }
 
 /**
@@ -16,26 +16,30 @@ function isObject(value) {
  * @param {*} value Reference to check.
  * @returns {boolean} True if `value` is an `Array`.
  */
-var isArray = Array.isArray;
+const {isArray} = Array;
 
-function deepKeys(obj, stack, parent, intermediate) {
-  Object.keys(obj).forEach(function(el) {
-    // Escape . in the element name
-    var escaped = el.replace(/\./g, '\\\.');
-    // If it's a nested object
-    if(isObject(obj[el]) && !isArray(obj[el])) {
-      // Concatenate the new parent if exist
-      var p = parent ? parent + '.' + escaped : parent;
-      // Push intermediate parent key if flag is true
-      if (intermediate) stack.push(parent ? p : escaped);
-      deepKeys(obj[el], stack, p || escaped, intermediate);
-    } else {
-      // Create and save the key
-      var key = parent ? parent + '.' + escaped : escaped;
-      stack.push(key)
-    }
-  });
-  return stack
+function deepKeys(object, stack, parent, intermediate) {
+	for (const element of Object.keys(object)) {
+		// Escape . in the element name
+		const escaped = element.replaceAll('.', '\\.');
+		// If it's a nested object
+		if (isObject(object[element]) && !isArray(object[element])) {
+			// Concatenate the new parent if exist
+			const p = parent ? parent + '.' + escaped : parent;
+			// Push intermediate parent key if flag is true
+			if (intermediate) {
+				stack.push(parent ? p : escaped);
+			}
+
+			deepKeys(object[element], stack, p || escaped, intermediate);
+		} else {
+			// Create and save the key
+			const key = parent ? parent + '.' + escaped : escaped;
+			stack.push(key);
+		}
+	}
+
+	return stack;
 }
 
 /**
@@ -52,6 +56,6 @@ function deepKeys(obj, stack, parent, intermediate) {
  * @example
  * deepKeys({ 'a.': { b: 1 }) ==> ["a\..b"]
  */
-module.exports = function (obj, intermediate) {
-  return deepKeys(obj, [], null, intermediate);
-};
+export default function _deepKeys(object, intermediate) {
+	return deepKeys(object, [], null, intermediate);
+}
